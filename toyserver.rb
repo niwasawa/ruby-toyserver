@@ -1,5 +1,6 @@
 require 'webrick'
 require 'cgi'
+require 'json'
 
 server = WEBrick::HTTPServer.new(
   :Port => 8000,
@@ -22,20 +23,31 @@ server.mount_proc('/') do |req, res|
     status = req.query['status'].to_i
   end
 
+  # headers
+  headers = res.header
+  headers['content-type'] = 'text/html'
+  if req.query.include?('headers')
+    JSON.parse(req.query['headers']).each do |key, val|
+      headers[key] = val
+    end
+  end
+
+  # response body
+  body = "<html><body>\n"
+  body += "#{CGI.escapeHTML(req.request_line)}"
+  body += "<br>#{CGI.escapeHTML(req.body)}\n" if req.body
+  body += "</body></html>\n"
+  if req.query.include?('body')
+    body = req.query['body']
+  end
+
   # wait
   if req.query.include?('wait')
     sleep(req.query['wait'].to_i)
   end
 
-  # create response body
-  body = "<html><body>\n"
-  body += "#{CGI.escapeHTML(req.request_line)}"
-  body += "<br>#{CGI.escapeHTML(req.body)}\n" if req.body
-  body += "</body></html>\n"
-
   # return response
   res.status = status
-  res['content-type'] = 'text/html'
   res.body = body
 end
 
