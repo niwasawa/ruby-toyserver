@@ -1,16 +1,37 @@
 require 'webrick'
+require 'webrick/https'
+require 'openssl'
 require 'cgi'
 require 'json'
+require 'optparse'
 
 class ToyServer
 
-  def start()
+  def initialize()
 
-    server = WEBrick::HTTPServer.new(
-      :Port => 8000,
+    port = 8000
+    ssl = false
+    opt = OptionParser.new
+    opt.on('-p [PORT]', '--port [PORT]'){|v|port=v}
+    opt.on('-s', '--ssl'){|v|ssl=v}
+    opt.parse(ARGV)
+
+    @config = {
+      :Port => port,
       :HTTPVersion => WEBrick::HTTPVersion.new('1.1'),
       :AccessLog => [[open(IO::NULL, 'w'), '']] # don't output access log
-    )
+    }
+    if ssl
+      @config.merge!({
+        :SSLEnable => true,
+        :SSLCertName => [['CN', WEBrick::Utils.getservername]]
+      })
+    end
+  end
+
+  def start()
+
+    server = WEBrick::HTTPServer.new(@config)
 
     server.mount_proc('/') do |req, res|
 
