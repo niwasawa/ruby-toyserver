@@ -3,8 +3,20 @@ ToyServer is a web server with Ruby.
 
 ## Start web server (with WEBrick)
 
-```ruby
+```
 $ ruby toyserver.rb
+```
+
+## Start SSL web server (with WEBrick)
+
+```
+$ ruby toyserver.rb --ssl
+```
+
+## Specify port number
+
+```
+$ ruby toyserver.rb --port 8000
 ```
 
 ## Access to ToyServer
@@ -73,5 +85,14 @@ Connection: Keep-Alive
 <html><body>
 GET /?wait=10 HTTP/1.1
 </body></html>
+```
+
+## Help
+
+```
+$ ruby toyserver.rb --help
+Usage: toyserver [options]
+    -p, --port [PORT]
+    -s, --ssl
 ```
 
